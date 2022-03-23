@@ -205,7 +205,10 @@ component {
                     <th scope=""col"">First Name</th>
                     <th scope=""col"">Last Name</th>
                     <th scope=""col"">Email</th>
+                    <th scope=""col"">Address</th>
                     <th scope=""col"">Phone</th>
+                    <th scope=""col"">DOB</th>
+                    <th scope=""col"">Role</th>
                 </tr>
             </thead>
             <tbody>");
@@ -216,7 +219,10 @@ component {
                         <td>#x.firstname#</td>
                         <td>#x.lastname#</td>
                         <td>#x.email#</td>
-                        <td>#x.phone#</td>");
+                        <td>#x.address#</td>
+                        <td>#x.phone#</td>
+                        <td>#DateFormat(x.dob,"dd-mm-yyy")#</td>
+                        <td>#x.role_id#</td>");
                     }
             }
             writeOutput("</tbody>
