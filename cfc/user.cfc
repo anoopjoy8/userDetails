@@ -133,6 +133,7 @@ component {
                     }
                     i++;
                 }
+                cffile(action="delete",file="F:\Coldfushion\cfusion\wwwroot\Userdetails\files/"&fileUploadResult.clientFile);
                 location("../pages/home.cfm?name=result_"&fileUploadResult.clientFile, "false")
             }
         }
@@ -194,10 +195,12 @@ component {
                 }
             i++;
             }
-
             SpreadsheetFormatRow(spObj,myFormat,1);
             SpreadsheetWrite(spObj,"F:\Coldfushion\cfusion\wwwroot\Userdetails\files/result_file.xlsx","yes");
-            cfheader( name="Content-Disposition", value="inline; filename=F:\Coldfushion\cfusion\wwwroot\Userdetails\files/"&arguments.file_name );
+            cffile(action="delete",file="F:\Coldfushion\cfusion\wwwroot\Userdetails\files/"&arguments.file_name);
+
+            cfheader( name="Content-Disposition", value="inline; filename=F:\Coldfushion\cfusion\wwwroot\Userdetails\files/"&arguments.file_name);
+            cffile(action="delete",file="F:\Coldfushion\cfusion\wwwroot\Userdetails\files\result_file.xlsx");
             cfcontent( type="application/vnd.msexcel",variable=SpreadSheetReadBinary(spObj));
         }
         catch(Exception e){
