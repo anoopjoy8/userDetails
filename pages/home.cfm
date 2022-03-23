@@ -2,7 +2,6 @@
 <cfif structKeyExists(url, 'name')>
       <cfset local.filename = url.name/>
 </cfif>
-
 <!--- get userdetails --->
 <cfset user_list         = createObject("component","Userdetails/cfc/user")/>
 <cfset users_list        = user_list.listUsers()/> 

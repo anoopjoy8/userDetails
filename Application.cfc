@@ -2,6 +2,7 @@ component {
     this.name          = "User Details";
     this.datasource    = "userdetails";
     this.sessionManagement  = true;
+    this.sessionTimeout = CreateTimeSpan(0, 0, 30, 0);
     
     function onRequestStart(requestname){ 
         application.rootpath = expandPath('./');
