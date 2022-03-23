@@ -27,14 +27,20 @@
 <body>
     <cfoutput>
         <div class="container">
-            <button type="button" class="btn btn-primary l1 cm">Plain Template</button>
-            <button type="button" class="btn btn-secondary l1">Template With  Data</button>
+            <form action="../cfc/user.cfc?method=plainTemplate" enctype="multipart/form-data" method="post">
+                <button type="submit" class="btn btn-primary l1 cm">Plain Template</button>
+            </form>
+            <form action="../cfc/user.cfc?method=downloadData" enctype="multipart/form-data" method="post">
+                <button type="submit" class="btn btn-secondary l1">Template With  Data</button>
+            </form>
             <form action="../cfc/user.cfc?method=upload" enctype="multipart/form-data" method="post">
                 <button type="submit" class="btn btn-info r1 cm">Upload</button>
                 <div class="mb-3 r1">
                     <input class="form-control" name="file_name" type="file" id="formFile">
                 </div>
             </form>
+
+            #users_list#
             
             <!-- Modal -->
             <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
