@@ -14,9 +14,9 @@ component {
         <p>Please Contact the developer</p>
         <p>Error details: #Exception.message#</p></center>');
     } 
- 
+    
     function onMissingTemplate(targetPage){
         writeOutput('<center><h1>This Page is not avilable.</h1>
         <p>Please go back:</p></center>');
-    }
+    } 
 }

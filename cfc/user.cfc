@@ -13,6 +13,8 @@ component {
         
                 local.i = 2;
                 local.statusflag  = "";
+                local.em="";
+                local.em_chk = 0;
 
                 cfloop( query="importdata",startrow=2) {
                     if ( (importdata.col_1 != "") || (importdata.col_2 != "") || (importdata.col_3 != "") || (importdata.col_4 != "") || (importdata.col_5 != "") || (importdata.col_6 != "") || (importdata.col_7 != "") ) {
@@ -23,7 +25,6 @@ component {
                             local.rolearray1  = "";
                             rolearray1        = listToArray(importdata.col_7);
                             local.flag = 0;
-                    
                             for( itm in rolearray1 ) {
 
                                 if(arrayFind(arrayList,itm) == 0)
@@ -33,33 +34,43 @@ component {
                     
                             }
                             if(flag == 0)
-                            {
+                            { 
                                 local.statusflag  = "";
                                 email_chk = queryExecute(
-                                    "SELECT id FROM users WHERE email = :email_id;", 
+                                    "SELECT id,firstname,email FROM users WHERE email = :email_id;", 
                                     {
                                         email_id   : { cfsqltype: "cf_sql_varchar", value: importdata.col_4}
                                     }
                                 );
+                                if(email_chk.RecordCount > 0){ 
+                                    local.lfind= listFind(em,email_chk.id, ",") ;
+                                    if(lfind == 0){
+                                        statusflag  = "update"; 
+                                        queryExecute("
+                                                UPDATE users
+                                                SET firstname = :firstname, lastname= :lastname, address= :address, email= :email, phone= :phone, dob= :dob,role_id = :role_id
+                                                WHERE id = :ID;",
+                                            {
+                                                firstname: { cfsqltype: "cf_sql_varchar", value: importdata.col_1 },
+                                                lastname: { cfsqltype: "cf_sql_varchar", value: importdata.col_2 },
+                                                address: { cfsqltype: "cf_sql_varchar", value: importdata.col_3 },
+                                                email: { cfsqltype: "cf_sql_varchar", value: importdata.col_4 },
+                                                phone: { cfsqltype: "cf_sql_varchar", value: importdata.col_5 },
+                                                dob: { cfsqltype: "cf_sql_varchar", value: DateFormat(importdata.col_6,"yyy-mm-dd") },
+                                                role_id: { cfsqltype: "cf_sql_varchar", value: importdata.col_7 },
+                                                ID: { cfsqltype: "cf_sql_varchar", value: email_chk.id}
 
-                                if(email_chk.RecordCount > 0){
-                                    statusflag  = "update";
-                                    queryExecute("
-                                            UPDATE users
-                                            SET firstname = :firstname, lastname= :lastname, address= :address, email= :email, phone= :phone, dob= :dob,role_id = :role_id
-                                            WHERE id = :ID;",
-                                        {
-                                            firstname: { cfsqltype: "cf_sql_varchar", value: importdata.col_1 },
-                                            lastname: { cfsqltype: "cf_sql_varchar", value: importdata.col_2 },
-                                            address: { cfsqltype: "cf_sql_varchar", value: importdata.col_3 },
-                                            email: { cfsqltype: "cf_sql_varchar", value: importdata.col_4 },
-                                            phone: { cfsqltype: "cf_sql_varchar", value: importdata.col_5 },
-                                            dob: { cfsqltype: "cf_sql_varchar", value: DateFormat(importdata.col_6,"yyy-mm-dd") },
-                                            role_id: { cfsqltype: "cf_sql_varchar", value: importdata.col_7 },
-                                            ID: { cfsqltype: "cf_sql_varchar", value: email_chk.id}
-
-                                        }
-                                    );    
+                                            },
+                                            {result = "rslt"}
+                                        );
+                                    }
+                                    else
+                                    {
+                                        em_chk = 1;
+                                    }
+                                    em = listAppend(em,email_chk.id);
+                                
+                                         
                                 }else{
                                     statusflag  = "add";
                                     queryExecute("
@@ -73,12 +84,12 @@ component {
                                             phone: { cfsqltype: "cf_sql_varchar", value: importdata.col_5 },
                                             dob: { cfsqltype: "cf_sql_varchar", value: DateFormat(importdata.col_6,"yyy-mm-dd") },
                                             role_id: { cfsqltype: "cf_sql_varchar", value: importdata.col_7 }
-                                        }
+                                        }                           
                                     );
                                 }
-
                             }
                         }
+                       
                         local.failList="";
                         if(importdata.col_1 == ""){
                             failList = listAppend(failList, "First name missing");
@@ -101,7 +112,10 @@ component {
                         if(importdata.col_7 == ""){
                             failList = listAppend(failList, "role missing");
                         }
-
+                        if(em_chk == 1){
+                            failList = listAppend(failList, "email already exist");
+                        }
+            
                         local.rolearray = "";
                         rolearray       = listToArray(importdata.col_7);
                         for( itm1 in rolearray ) {
@@ -121,7 +135,7 @@ component {
                         {
                             failList = listAppend(failList, "successfully updated");
                         }
-
+                  
                         local.spObj          = spreadsheetread("F:\Coldfushion\cfusion\wwwroot\Userdetails\files/result_"&fileUploadResult.clientFile,"Sheet1");
                         local.myFormat       = StructNew();
                         local.myFormat.bold  ="true";
