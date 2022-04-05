@@ -15,14 +15,13 @@ component {
                 local.statusflag  = "";
                 local.em="";
                 local.em_chk = 0;
-
                 cfloop( query="importdata",startrow=2) {
                     if ( (importdata.col_1 != "") || (importdata.col_2 != "") || (importdata.col_3 != "") || (importdata.col_4 != "") || (importdata.col_5 != "") || (importdata.col_6 != "") || (importdata.col_7 != "") ) {
                         local.statusflag  = "";
                         if ( (importdata.col_1 != "") && (importdata.col_2 != "") && (importdata.col_3 != "") && (importdata.col_4 != "") && (importdata.col_5 != "") && (importdata.col_6 != "") && (importdata.col_7 != "") ) {
                             local.statusflag  = "";
                             local.role_chk    = "";
-                            local.rolearray1  = "";
+                            local.rolearray1  = ""; 
                             rolearray1        = listToArray(importdata.col_7);
                             local.flag = 0;
                             
@@ -46,7 +45,7 @@ component {
                                 if(email_chk.RecordCount > 0){ 
                                     local.lfind= listFind(em,email_chk.id, ",") ;
                                     if(lfind == 0){
-                                        statusflag  = "update"; 
+                                        statusflag  = "update";
                                         em_chk = 0;
                                         queryExecute("
                                                 UPDATE users
@@ -66,31 +65,58 @@ component {
                                         );
 
                                         //delete roles table
-                                        queryExecute("
+                                 /*        queryExecute("
                                                DELETE FROM user_roles WHERE user_id= :ID;",
                                             {
                                                 ID: { cfsqltype: "cf_sql_varchar", value: email_chk.id}
                                             }
-                                        );
+                                        ); */
+                                        local.r_lists =[];
 
                                         for( role_name in rolearray1 ) {
-                                            role_id_res = queryExecute(
-                                                "SELECT id FROM roles WHERE role = :rolename;", 
+
+                                            rq = queryExecute(
+                                                "SELECT id FROM roles 
+                                                WHERE role = :rolename;", 
                                                 {
-                                                    rolename   : { cfsqltype: "cf_sql_varchar", value: role_name}
+                                                    rolename: { cfsqltype: "cf_sql_varchar", value: role_name}
                                                 }
                                             );
+                                            
+                                            arrayAppend(r_lists,rq.id);
+                                           
+                                            
                                             queryExecute("
-                                                insert into user_roles(user_id,role_id)
-                                                values( :UserId, :roleId )",
+                                                INSERT INTO user_roles(user_id,role_id) 
+                                                SELECT c.id,roles.id
+                                                FROM  roles
+                                                INNER JOIN users c ON c.id = :ID
+                                                WHERE(roles.role = :rolename)
+                                                AND (:ID NOT IN (SELECT user_id FROM user_roles where roles.id = user_roles.role_id ))
+                                                ",
+
                                                 {
-                                                    UserId: { cfsqltype: "cf_sql_integer", value: email_chk.id},
-                                                    roleId: { cfsqltype: "cf_sql_integer", value: role_id_res.id }
+                                                    rolename: { cfsqltype: "cf_sql_varchar", value: role_name},
+                                                    ID: { cfsqltype: "cf_sql_varchar", value: email_chk.id}
                                                 }                           
-                                            );
+                                            );     
                                      
                                         }
-
+                                        
+                                    
+                                    //rArray =listToArray(r_lists," ",true,true);
+                               
+                                        aa =r_lists.toList();
+                                        df =queryExecute(
+                                                "DELETE FROM user_roles 
+                                                WHERE user_id = #email_chk.id# AND
+                                                role_id NOT IN (#aa#);"
+                                            );
+                                         
+                        
+                                       
+                     
+                        //writeDump(df);
 
                                     }
                                     else
